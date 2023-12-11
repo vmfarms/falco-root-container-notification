@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-rules
+  namespace: falco
+data:
+  custom-rules.yaml: |-
+    - list: run_as_root_image_list
+      items: []
+
+    - macro: user_known_run_as_root_container
+      condition: (container.image.repository in (run_as_root_image_list))
+
+    - rule: Container Run as Root User
+      desc: > 
+        Container detected running as the root user. This should be taken into account especially when policies disallow containers from running with 
+        root user privileges. Note that a root user in containers doesn't inherently possess extensive power, as modern container environments define 
+        privileges through Linux capabilities. To learn more, check out the rule "Launch Privileged Container".
+      condition: > 
+        spawned_process 
+        and container 
+        and proc.vpid=1 
+        and user.uid=0 
+        and not user_known_run_as_root_container
+      enabled: true
+      output: Container launched with root user privilege (evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty exe_flags=%evt.arg.flags %container.info)
+      priority: ALERT
+      tags: [maturity_sandbox, container, process, users, mitre_execution, T1610]
