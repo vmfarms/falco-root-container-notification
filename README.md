@@ -16,6 +16,8 @@ The following is required to run this project properly:
 
 ## Usage
 - Clone the repo
+- Create a new app to send webhooks to a Slack channel. Refer to their [documentation](https://api.slack.com/messaging/webhooks) for guidence
+- Replace the `REPLACE_ME` in the `config/faldosickick-patch.yaml` with the Slack webhook url
 - Install its content using `make install`
 
 ## License
